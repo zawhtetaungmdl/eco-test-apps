@@ -1,5 +1,31 @@
 import { useNavigate } from 'react-router-dom';
 import BottomNav from '../components/BottomNav';
+import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
+
+// Mock Data for Weekly AQI
+const data = [
+  { day: 'Mon', aqi: 110 },
+  { day: 'Tue', aqi: 135 },
+  { day: 'Wed', aqi: 120 },
+  { day: 'Thu', aqi: 145 },
+  { day: 'Fri', aqi: 125 },
+  { day: 'Sat', aqi: 90 },
+  { day: 'Sun', aqi: 80 },
+];
+
+const CustomTooltip = ({ active, payload, label }: any) => {
+  if (active && payload && payload.length) {
+    return (
+      <div className="bg-white/90 dark:bg-black/90 p-2 rounded-lg border border-gray-100 dark:border-white/10 shadow-sm text-xs">
+        <p className="font-bold mb-1">{label}</p>
+        <p className="text-orange-500 font-semibold">
+          Avg AQI: {payload[0].value}
+        </p>
+      </div>
+    );
+  }
+  return null;
+};
 
 export default function StatsWeekly() {
     const navigate = useNavigate();
@@ -54,51 +80,37 @@ export default function StatsWeekly() {
                         </div>
                     </div>
 
-                    <div className="relative h-48 w-full">
-                        {/* Y-Axis Labels */}
-                        <div className="absolute inset-0 flex flex-col justify-between text-[10px] text-gray-400 font-medium">
-                            <div className="border-b border-gray-100 dark:border-white/5 w-full h-0 pb-2">200</div>
-                            <div className="border-b border-gray-100 dark:border-white/5 w-full h-0 pb-2">150</div>
-                            <div className="border-b border-gray-100 dark:border-white/5 w-full h-0 pb-2">100</div>
-                            <div className="border-b border-gray-100 dark:border-white/5 w-full h-0 pb-2">50</div>
-                            <div className="border-b border-gray-100 dark:border-white/5 w-full h-0">0</div>
-                        </div>
-
-                        {/* SVG Graph - slightly flatter curve for weekly demo */}
-                        <svg className="absolute inset-0 w-full h-full overflow-visible z-10" preserveAspectRatio="none" viewBox="0 0 100 100">
-                            <defs>
-                                <linearGradient id="lineGradientWeekly" x1="0" x2="0" y1="0" y2="1">
-                                    <stop offset="0%" stopColor="#f97316"></stop>
-                                    <stop offset="50%" stopColor="#f97316"></stop>
-                                    <stop offset="100%" stopColor="#22c55e"></stop>
-                                </linearGradient>
-                                <linearGradient id="fillGradientWeekly" x1="0" x2="0" y1="0" y2="1">
-                                    <stop offset="0%" stopColor="#f97316" stopOpacity="0.2"></stop>
-                                    <stop offset="100%" stopColor="#22c55e" stopOpacity="0"></stop>
-                                </linearGradient>
-                                <filter height="140%" id="glow" width="140%" x="-20%" y="-20%">
-                                    <feGaussianBlur result="coloredBlur" stdDeviation="2"></feGaussianBlur>
-                                    <feMerge>
-                                        <feMergeNode in="coloredBlur"></feMergeNode>
-                                        <feMergeNode in="SourceGraphic"></feMergeNode>
-                                    </feMerge>
-                                </filter>
-                            </defs>
-                            <path d="M0,60 C15,65 30,50 45,55 C60,60 75,40 85,45 C95,50 100,45 100,45 L100,100 L0,100 Z" fill="url(#fillGradientWeekly)"></path>
-                            <path d="M0,60 C15,65 30,50 45,55 C60,60 75,40 85,45 C95,50 100,45 100,45" fill="none" filter="url(#glow)" stroke="url(#lineGradientWeekly)" strokeLinecap="round" strokeWidth="3"></path>
-                            <circle cx="45" cy="55" fill="#fff" r="3" stroke="#f97316" strokeWidth="2"></circle>
-                            <circle cx="85" cy="45" fill="#fff" r="3" stroke="#f97316" strokeWidth="2"></circle>
-                        </svg>
-                    </div>
-
-                    <div className="flex justify-between mt-2 text-[10px] text-gray-400 font-bold uppercase tracking-wide">
-                        <span>Mon</span>
-                        <span>Tue</span>
-                        <span>Wed</span>
-                        <span>Thu</span>
-                        <span>Fri</span>
-                        <span>Sat</span>
-                        <span>Sun</span>
+                    <div className="h-48 w-full -ml-2">
+                         <ResponsiveContainer width="100%" height="100%">
+                            <AreaChart data={data}>
+                                <defs>
+                                    <linearGradient id="colorAqiWeekly" x1="0" y1="0" x2="0" y2="1">
+                                        <stop offset="5%" stopColor="#f97316" stopOpacity={0.8}/>
+                                        <stop offset="95%" stopColor="#f97316" stopOpacity={0}/>
+                                    </linearGradient>
+                                </defs>
+                                <XAxis
+                                    dataKey="day"
+                                    axisLine={false}
+                                    tickLine={false}
+                                    tick={{ fontSize: 10, fill: '#9ca3af', fontWeight: 'bold' }}
+                                    interval="preserveStartEnd"
+                                />
+                                <YAxis
+                                    hide
+                                    domain={[0, 200]}
+                                />
+                                <Tooltip content={<CustomTooltip />} />
+                                <Area
+                                    type="monotone"
+                                    dataKey="aqi"
+                                    stroke="#f97316"
+                                    strokeWidth={3}
+                                    fillOpacity={1}
+                                    fill="url(#colorAqiWeekly)"
+                                />
+                            </AreaChart>
+                        </ResponsiveContainer>
                     </div>
                 </div>
             </section>

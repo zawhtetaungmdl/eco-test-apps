@@ -1,5 +1,33 @@
 import { useNavigate } from 'react-router-dom';
 import BottomNav from '../components/BottomNav';
+import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
+
+// Mock Data for Daily AQI (Hourly)
+const data = [
+  { time: '12 AM', aqi: 45 },
+  { time: '3 AM', aqi: 55 },
+  { time: '6 AM', aqi: 120 },
+  { time: '9 AM', aqi: 160 },
+  { time: '12 PM', aqi: 140 },
+  { time: '3 PM', aqi: 110 },
+  { time: '6 PM', aqi: 85 },
+  { time: '9 PM', aqi: 60 },
+  { time: 'Now', aqi: 50 },
+];
+
+const CustomTooltip = ({ active, payload, label }: any) => {
+  if (active && payload && payload.length) {
+    return (
+      <div className="bg-white/90 dark:bg-black/90 p-2 rounded-lg border border-gray-100 dark:border-white/10 shadow-sm text-xs">
+        <p className="font-bold mb-1">{label}</p>
+        <p className="text-forest dark:text-green-400 font-semibold">
+          AQI: {payload[0].value}
+        </p>
+      </div>
+    );
+  }
+  return null;
+};
 
 export default function Stats() {
   const navigate = useNavigate();
@@ -52,49 +80,37 @@ export default function Stats() {
                         </div>
                     </div>
 
-                    <div className="relative h-48 w-full">
-                        {/* Y-Axis Labels */}
-                        <div className="absolute inset-0 flex flex-col justify-between text-[10px] text-gray-400 font-medium">
-                            <div className="border-b border-gray-100 dark:border-white/5 w-full h-0 pb-2">200</div>
-                            <div className="border-b border-gray-100 dark:border-white/5 w-full h-0 pb-2">150</div>
-                            <div className="border-b border-gray-100 dark:border-white/5 w-full h-0 pb-2">100</div>
-                            <div className="border-b border-gray-100 dark:border-white/5 w-full h-0 pb-2">50</div>
-                            <div className="border-b border-gray-100 dark:border-white/5 w-full h-0">0</div>
-                        </div>
-
-                        {/* SVG Graph */}
-                        <svg className="absolute inset-0 w-full h-full overflow-visible z-10" preserveAspectRatio="none" viewBox="0 0 100 100">
-                            <defs>
-                                <linearGradient id="lineGradient" x1="0" x2="0" y1="0" y2="1">
-                                    <stop offset="0%" stopColor="#ef4444"></stop>
-                                    <stop offset="50%" stopColor="#f97316"></stop>
-                                    <stop offset="100%" stopColor="#22c55e"></stop>
-                                </linearGradient>
-                                <linearGradient id="fillGradient" x1="0" x2="0" y1="0" y2="1">
-                                    <stop offset="0%" stopColor="#ef4444" stopOpacity="0.2"></stop>
-                                    <stop offset="100%" stopColor="#22c55e" stopOpacity="0"></stop>
-                                </linearGradient>
-                                <filter height="140%" id="glow" width="140%" x="-20%" y="-20%">
-                                    <feGaussianBlur result="coloredBlur" stdDeviation="2"></feGaussianBlur>
-                                    <feMerge>
-                                        <feMergeNode in="coloredBlur"></feMergeNode>
-                                        <feMergeNode in="SourceGraphic"></feMergeNode>
-                                    </feMerge>
-                                </filter>
-                            </defs>
-                            <path d="M0,80 C15,75 25,60 40,40 C55,20 70,30 85,25 C95,20 100,15 100,15 L100,100 L0,100 Z" fill="url(#fillGradient)"></path>
-                            <path d="M0,80 C15,75 25,60 40,40 C55,20 70,30 85,25 C95,20 100,15 100,15" fill="none" filter="url(#glow)" stroke="url(#lineGradient)" strokeLinecap="round" strokeWidth="3"></path>
-                            <circle cx="40" cy="40" fill="#fff" r="3" stroke="#f97316" strokeWidth="2"></circle>
-                            <circle cx="85" cy="25" fill="#fff" r="3" stroke="#ef4444" strokeWidth="2"></circle>
-                        </svg>
-                    </div>
-
-                    <div className="flex justify-between mt-2 text-[10px] text-gray-400 font-bold uppercase tracking-wide">
-                        <span>12 AM</span>
-                        <span>6 AM</span>
-                        <span>12 PM</span>
-                        <span>6 PM</span>
-                        <span>Now</span>
+                    <div className="h-48 w-full -ml-2">
+                        <ResponsiveContainer width="100%" height="100%">
+                            <AreaChart data={data}>
+                                <defs>
+                                    <linearGradient id="colorAqi" x1="0" y1="0" x2="0" y2="1">
+                                        <stop offset="5%" stopColor="#ef4444" stopOpacity={0.8}/>
+                                        <stop offset="95%" stopColor="#ef4444" stopOpacity={0}/>
+                                    </linearGradient>
+                                </defs>
+                                <XAxis
+                                    dataKey="time"
+                                    axisLine={false}
+                                    tickLine={false}
+                                    tick={{ fontSize: 10, fill: '#9ca3af', fontWeight: 'bold' }}
+                                    interval="preserveStartEnd"
+                                />
+                                <YAxis
+                                    hide
+                                    domain={[0, 200]}
+                                />
+                                <Tooltip content={<CustomTooltip />} />
+                                <Area
+                                    type="monotone"
+                                    dataKey="aqi"
+                                    stroke="#ef4444"
+                                    strokeWidth={3}
+                                    fillOpacity={1}
+                                    fill="url(#colorAqi)"
+                                />
+                            </AreaChart>
+                        </ResponsiveContainer>
                     </div>
                 </div>
             </section>
