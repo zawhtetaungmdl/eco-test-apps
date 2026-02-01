@@ -122,9 +122,8 @@ export default function DashboardReal() {
   const theme = getTheme();
 
   // Background/Animation theme logic
-  // If purifying, force green. Else use status theme.
   const bgRipple = isPurifying ? 'bg-green-600' : theme.ripple;
-  const bgFlashOpacity = isPurifying ? 'opacity-20' : theme.flashOpacity; // Reduced opacity for green to be subtle/pleasant
+  const bgFlashOpacity = isPurifying ? 'opacity-20' : theme.flashOpacity;
 
   return (
     <div className="bg-background-light dark:bg-background-dark font-display text-[#111811] dark:text-white transition-colors duration-200 relative min-h-screen pb-24">
@@ -134,8 +133,13 @@ export default function DashboardReal() {
       )}
 
       {/* Background Flash Animation */}
-      {/* Logic Update: Use bgRipple if purifying */}
       <div className={`fixed inset-0 z-0 pointer-events-none animate-bg-flash transition-colors duration-500 ${bgRipple} ${bgFlashOpacity} mix-blend-multiply dark:mix-blend-overlay`}></div>
+
+      {/* Texture Overlay (Plus Pattern) - Only visible when purifying */}
+      <div
+        className={`fixed inset-0 z-0 pointer-events-none transition-opacity duration-500 ${isPurifying ? 'opacity-20' : 'opacity-0'}`}
+        style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M9 9H5v2h4v4h2v-4h4V9h-4V5H9v4z' fill='%23ffffff' fill-opacity='1' fill-rule='evenodd'/%3E%3C/svg%3E\")" }}
+      ></div>
 
       <div className="relative z-10 flex h-full min-h-screen w-full flex-col overflow-x-hidden">
         <header className="flex items-center justify-center px-6 py-4">
