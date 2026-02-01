@@ -23,8 +23,6 @@ export default function FindDevice() {
       } catch (err) {
         console.error("Camera access denied:", err);
         setCameraError("Camera access denied. Using simulation.");
-        // Fallback or just proceed with simulation if desired,
-        // but prompt implies we must request access first.
       }
     }
 
@@ -42,9 +40,10 @@ export default function FindDevice() {
   useEffect(() => {
     // Only start detection simulation if camera is active
     if (hasCamera) {
+      // Updated delay to 5 seconds
       const timer = setTimeout(() => {
         setIsFound(true);
-      }, 3000);
+      }, 5000);
       return () => clearTimeout(timer);
     }
   }, [hasCamera]);
@@ -76,7 +75,8 @@ export default function FindDevice() {
         {/* Top Controls */}
         <div className="absolute top-0 left-0 right-0 z-20 flex items-center justify-between px-4 pt-14 pb-4">
             <button
-                onClick={() => navigate('/pair')}
+                // Updated close button to navigate to home ('/')
+                onClick={() => navigate('/')}
                 className="flex items-center justify-center w-10 h-10 rounded-full bg-stone-900/40 backdrop-blur-md border border-white/10 active:bg-stone-900/60 transition-colors"
             >
                 <span className="material-symbols-outlined text-white text-[20px]">close</span>
@@ -165,9 +165,11 @@ export default function FindDevice() {
             </div>
 
             <div className="flex justify-center">
-                <button className="text-white/70 text-sm font-medium hover:text-white transition-colors flex items-center gap-2 drop-shadow-md">
-                    <span>Don't see your device?</span>
-                    <span className="underline decoration-white/40 underline-offset-4" onClick={() => navigate('/pair')}>Pair manually</span>
+                <button
+                    onClick={() => navigate('/pair')}
+                    className="text-white/70 text-sm font-medium hover:text-white transition-colors flex items-center gap-2 drop-shadow-md underline decoration-white/40 underline-offset-4"
+                >
+                    Don't see your device? Pair Manually
                 </button>
             </div>
             <div className="h-4"></div>
