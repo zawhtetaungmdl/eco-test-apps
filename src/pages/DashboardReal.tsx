@@ -121,6 +121,11 @@ export default function DashboardReal() {
 
   const theme = getTheme();
 
+  // Background/Animation theme logic
+  // If purifying, force green. Else use status theme.
+  const bgRipple = isPurifying ? 'bg-green-600' : theme.ripple;
+  const bgFlashOpacity = isPurifying ? 'opacity-20' : theme.flashOpacity; // Reduced opacity for green to be subtle/pleasant
+
   return (
     <div className="bg-background-light dark:bg-background-dark font-display text-[#111811] dark:text-white transition-colors duration-200 relative min-h-screen pb-24">
 
@@ -129,7 +134,8 @@ export default function DashboardReal() {
       )}
 
       {/* Background Flash Animation */}
-      <div className={`fixed inset-0 z-0 pointer-events-none animate-bg-flash transition-colors duration-500 ${theme.ripple} ${theme.flashOpacity} mix-blend-multiply dark:mix-blend-overlay`}></div>
+      {/* Logic Update: Use bgRipple if purifying */}
+      <div className={`fixed inset-0 z-0 pointer-events-none animate-bg-flash transition-colors duration-500 ${bgRipple} ${bgFlashOpacity} mix-blend-multiply dark:mix-blend-overlay`}></div>
 
       <div className="relative z-10 flex h-full min-h-screen w-full flex-col overflow-x-hidden">
         <header className="flex items-center justify-center px-6 py-4">
@@ -163,10 +169,10 @@ export default function DashboardReal() {
           ) : (
             <>
               <div className="relative mb-8 flex size-28 items-center justify-center">
-                {/* Ripple Effects with dynamic colors */}
-                <div className={`absolute inset-0 rounded-full ${theme.ripple} opacity-50 animate-ripple-sharp`}></div>
-                <div className={`absolute inset-0 rounded-full ${theme.ripple} opacity-40 animate-ripple-sharp`} style={{ animationDelay: '200ms' }}></div>
-                <div className={`absolute inset-0 rounded-full ${theme.ripple} opacity-30 animate-ripple-sharp`} style={{ animationDelay: '400ms' }}></div>
+                {/* Ripple Effects with dynamic colors - Using bgRipple for purification state */}
+                <div className={`absolute inset-0 rounded-full ${bgRipple} opacity-50 animate-ripple-sharp`}></div>
+                <div className={`absolute inset-0 rounded-full ${bgRipple} opacity-40 animate-ripple-sharp`} style={{ animationDelay: '200ms' }}></div>
+                <div className={`absolute inset-0 rounded-full ${bgRipple} opacity-30 animate-ripple-sharp`} style={{ animationDelay: '400ms' }}></div>
 
                 <div className={`relative z-10 flex size-28 items-center justify-center rounded-full ${theme.bg} shadow-sm border ${theme.border} animate-pulse-fast transition-colors duration-500`}>
                   <span className={`material-symbols-outlined ${theme.text} text-[54px] fill-1 rotate-12 transition-colors duration-500`}>eco</span>
