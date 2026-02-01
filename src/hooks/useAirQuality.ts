@@ -19,13 +19,20 @@ export interface LocationData {
   lon: number;
 }
 
-export const AQI_LEVELS = [
-  { max: 50, label: "Good", color: "forest", status: "Good" },
-  { max: 100, label: "Moderate", color: "urgent", status: "Moderate" },
-  { max: 150, label: "Unhealthy (Sensitive)", color: "urgent", status: "Unhealthy" },
-  { max: 200, label: "Unhealthy", color: "danger", status: "Unhealthy" },
-  { max: 300, label: "Very Unhealthy", color: "danger", status: "Very Unhealthy" },
-  { max: 1000, label: "Hazardous", color: "danger", status: "Hazardous" },
+export interface AqiLevel {
+  max: number;
+  label: string;
+  status: string;
+  colorName: 'green' | 'yellow' | 'orange' | 'red' | 'purple' | 'maroon';
+}
+
+export const AQI_LEVELS: AqiLevel[] = [
+  { max: 50, label: "Good", status: "Good", colorName: 'green' },
+  { max: 100, label: "Moderate", status: "Moderate", colorName: 'yellow' },
+  { max: 150, label: "Unhealthy for Sensitive Groups", status: "Unhealthy (Sensitive)", colorName: 'orange' },
+  { max: 200, label: "Unhealthy", status: "Unhealthy", colorName: 'red' },
+  { max: 300, label: "Very Unhealthy", status: "Very Unhealthy", colorName: 'purple' },
+  { max: 10000, label: "Hazardous", status: "Hazardous", colorName: 'maroon' },
 ];
 
 export const getStatus = (aqi: number) => {
