@@ -116,14 +116,6 @@ export default function Pairing() {
             </div>
         </div>
 
-        {/* Footer Link */}
-        <div className="pb-12 pt-4 z-10">
-            <button className="flex items-center gap-2 text-stone-500 font-medium text-sm group">
-                <span className="material-symbols-outlined text-lg">qr_code_scanner</span>
-                <span className="underline decoration-stone-300 underline-offset-4 group-hover:text-leaf-primary transition-colors">Scan QR code</span>
-            </button>
-        </div>
-
         {/* Background Graphic */}
         <div className="absolute -bottom-10 -right-10 opacity-10 pointer-events-none z-0">
             <span className="material-symbols-outlined text-[200px]">spa</span>
