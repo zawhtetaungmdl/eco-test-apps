@@ -13,9 +13,12 @@ export default function FindDevice() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const requestRef = useRef<number>();
+  const streamRef = useRef<MediaStream | null>(null);
+  const isFoundRef = useRef(false);
 
   useEffect(() => {
     let model: cocoSsd.ObjectDetection | undefined;
+    isFoundRef.current = false;
 
     // Initialize TensorFlow Model
     const initModel = async () => {
@@ -35,26 +38,32 @@ export default function FindDevice() {
           video: { facingMode: 'environment' }
         });
 
+        streamRef.current = stream;
+
         // Ensure video element exists before assigning
         if (videoRef.current) {
           videoRef.current.srcObject = stream;
           // IMPORTANT: Wait for metadata to load to ensure size is known
           videoRef.current.onloadedmetadata = () => {
              setHasCamera(true);
-             if (model && !isFound) detectFrame(model);
+             if (model && !isFoundRef.current) detectFrame(model);
           };
         }
       } catch (err) {
         console.error("Camera access denied:", err);
         setCameraError("Camera access denied. Using simulation.");
         // Fallback simulation if camera fails
-        setTimeout(() => setIsFound(true), 5000);
+        setTimeout(() => {
+             setIsFound(true);
+             isFoundRef.current = true;
+        }, 5000);
       }
     };
 
     // Detection Loop
     const detectFrame = (loadedModel: cocoSsd.ObjectDetection) => {
       if (!videoRef.current || !canvasRef.current || !loadedModel) return;
+      if (isFoundRef.current) return; // Stop loop if found
 
       // Ensure video is ready
       if (videoRef.current.readyState >= 2) {
@@ -63,21 +72,20 @@ export default function FindDevice() {
         canvasRef.current.height = videoRef.current.videoHeight;
 
         loadedModel.detect(videoRef.current).then(predictions => {
+          if (isFoundRef.current) return;
+
           // Check for 'bottle' or 'cup'
           const foundTarget = predictions.find(p => (p.class === 'bottle' || p.class === 'cup') && p.score > 0.6);
 
           if (foundTarget) {
             setIsFound(true);
+            isFoundRef.current = true;
           } else {
-             if (!isFound) {
-                 requestRef.current = requestAnimationFrame(() => detectFrame(loadedModel));
-             }
+             requestRef.current = requestAnimationFrame(() => detectFrame(loadedModel));
           }
         });
       } else {
-         if (!isFound) {
-             requestRef.current = requestAnimationFrame(() => detectFrame(loadedModel));
-         }
+         requestRef.current = requestAnimationFrame(() => detectFrame(loadedModel));
       }
     };
 
@@ -85,28 +93,24 @@ export default function FindDevice() {
     (async () => {
       await initModel();
       // Only start camera after model is ready or if we want to show feed while loading
-      // It's better to start camera ASAP for UX, but we need model for detection.
       await startCamera();
     })();
 
     return () => {
       if (requestRef.current) cancelAnimationFrame(requestRef.current);
-      if (videoRef.current && videoRef.current.srcObject) {
-        const stream = videoRef.current.srcObject as MediaStream;
-        stream.getTracks().forEach(track => track.stop());
+
+      // Stop all tracks from the stored stream reference
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach(track => track.stop());
+        streamRef.current = null;
       }
     };
-  }, [isFound]); // Add isFound dependency to stop loop if found
+  }, []); // Empty dependency array to prevent camera restart
 
   return (
     <div className="bg-black text-white font-display-grotesk overflow-hidden h-screen w-full relative">
         {/* Camera Feed Background */}
         <div className="absolute inset-0 z-0 bg-stone-900">
-            {/*
-               Logic change: Always render the video tag if we don't have an error,
-               so it can initialize. Hidden if not hasCamera yet?
-               No, we need it mounted to set the ref.
-            */}
             {!cameraError ? (
                 <>
                   <video
