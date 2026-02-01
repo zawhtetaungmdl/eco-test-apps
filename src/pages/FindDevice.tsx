@@ -1,28 +1,76 @@
 import { useNavigate } from 'react-router-dom';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 export default function FindDevice() {
   const navigate = useNavigate();
   const [isFound, setIsFound] = useState(false);
+  const [hasCamera, setHasCamera] = useState(false);
+  const [cameraError, setCameraError] = useState<string | null>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
-    // Simulate finding the device after 3 seconds
-    const timer = setTimeout(() => {
-      setIsFound(true);
-    }, 3000);
-    return () => clearTimeout(timer);
+    // Request Camera Access
+    async function startCamera() {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: 'environment' }
+        });
+
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream;
+          setHasCamera(true);
+        }
+      } catch (err) {
+        console.error("Camera access denied:", err);
+        setCameraError("Camera access denied. Using simulation.");
+        // Fallback or just proceed with simulation if desired,
+        // but prompt implies we must request access first.
+      }
+    }
+
+    startCamera();
+
+    // Cleanup stream on unmount
+    return () => {
+      if (videoRef.current && videoRef.current.srcObject) {
+        const stream = videoRef.current.srcObject as MediaStream;
+        stream.getTracks().forEach(track => track.stop());
+      }
+    };
   }, []);
+
+  useEffect(() => {
+    // Only start detection simulation if camera is active
+    if (hasCamera) {
+      const timer = setTimeout(() => {
+        setIsFound(true);
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [hasCamera]);
 
   return (
     <div className="bg-black text-white font-display-grotesk overflow-hidden h-screen w-full relative">
         {/* Camera Feed Background */}
-        <div className="absolute inset-0 z-0">
-            <img
-                alt="Camera Feed"
-                className="w-full h-full object-cover opacity-90"
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuAc1ps-oFtBqjC__YynziTinchwkORlgp63vsxlntT42OlARp8lymPWNGtq5a0utx66ulcvAEYfL0AHJEyidfg2-CJa7Z40kkx_UUb6sNBJOQTiE4SQ9RYhR-nvY6lXBGdePxZdad6FIl-6Kb0oAhWd_D3Wm5YEdqdBQofhCVnZto7HXWluNZ4_BVUGAxMJn3TX7JJhabWL917mSb8Bn2TSgt3xsDKsR3sIH5HJeVGLnzhoaCiePMBV_aSyICGuzdDRao_d-eYypEOV"
-            />
-            <div className="absolute inset-0 bg-gradient-to-b from-[#292524]/60 via-[#292524]/10 to-[#1c1917]/80"></div>
+        <div className="absolute inset-0 z-0 bg-stone-900">
+            {hasCamera ? (
+                <video
+                    ref={videoRef}
+                    autoPlay
+                    playsInline
+                    muted
+                    className="w-full h-full object-cover opacity-90"
+                />
+            ) : (
+                 // Fallback Image if camera denied or loading
+                <img
+                    alt="Camera Feed Placeholder"
+                    className="w-full h-full object-cover opacity-90"
+                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuAc1ps-oFtBqjC__YynziTinchwkORlgp63vsxlntT42OlARp8lymPWNGtq5a0utx66ulcvAEYfL0AHJEyidfg2-CJa7Z40kkx_UUb6sNBJOQTiE4SQ9RYhR-nvY6lXBGdePxZdad6FIl-6Kb0oAhWd_D3Wm5YEdqdBQofhCVnZto7HXWluNZ4_BVUGAxMJn3TX7JJhabWL917mSb8Bn2TSgt3xsDKsR3sIH5HJeVGLnzhoaCiePMBV_aSyICGuzdDRao_d-eYypEOV"
+                />
+            )}
+
+            <div className="absolute inset-0 bg-gradient-to-b from-[#292524]/60 via-[#292524]/10 to-[#1c1917]/80 pointer-events-none"></div>
         </div>
 
         {/* Top Controls */}
@@ -36,7 +84,7 @@ export default function FindDevice() {
             <div className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-stone-900/40 backdrop-blur-md border border-white/10">
                 <div className={`w-1.5 h-1.5 rounded-full ${isFound ? 'bg-leaf-primary' : 'bg-red-500'} animate-pulse shadow-[0_0_8px_rgba(239,68,68,0.8)]`}></div>
                 <span className="text-xs font-bold tracking-widest uppercase text-white/90">
-                    {isFound ? 'Device Found' : 'Eco-Scan Live'}
+                    {isFound ? 'Device Found' : (cameraError || 'Eco-Scan Live')}
                 </span>
             </div>
             <button className="flex items-center justify-center w-10 h-10 rounded-full bg-stone-900/40 backdrop-blur-md border border-white/10 active:bg-stone-900/60 transition-colors">
@@ -66,10 +114,11 @@ export default function FindDevice() {
             <div className="text-center px-6 max-w-xs">
                 <h2 className="text-2xl font-bold text-white drop-shadow-xl tracking-tight leading-tight">Find your Econex device</h2>
                 <p className="text-white/80 text-sm mt-3 font-medium tracking-wide">Bring the device into the frame to connect</p>
+                {cameraError && <p className="text-red-400 text-xs mt-2">{cameraError}</p>}
             </div>
         </div>
 
-        {/* Found Device Indicator (Mock Augmented Reality) */}
+        {/* Found Device Indicator */}
         {isFound && (
              <div className="absolute z-10 top-[42%] left-[28%] pointer-events-auto cursor-pointer group animate-bounce">
                 <div className="relative flex items-center justify-center">
@@ -77,7 +126,7 @@ export default function FindDevice() {
                     <div className="absolute w-20 h-20 bg-leaf-primary/30 rounded-full animate-ping opacity-75"></div>
                     <div className="absolute top-4 left-4 w-8 h-8 border-l border-b border-white/40 -rotate-45"></div>
 
-                    {/* Popover always visible when found */}
+                    {/* Popover */}
                     <div className="absolute left-8 top-8 bg-[#fdfefc] backdrop-blur-xl border border-white/40 p-3 rounded-xl min-w-[160px] shadow-xl transform translate-y-2 opacity-100 transition-all duration-300 origin-top-left block">
                         <div className="flex items-center gap-2 mb-1">
                             <span className="material-symbols-outlined text-leaf-primary text-sm font-bold">eco</span>
@@ -94,7 +143,7 @@ export default function FindDevice() {
             </div>
         )}
 
-        {/* Bottom Panel - Slide up when found */}
+        {/* Bottom Panel */}
         <div className={`absolute bottom-0 left-0 right-0 z-20 bg-gradient-to-t from-[#1c1917] via-[#1c1917]/80 to-transparent pt-20 pb-8 px-5 transition-transform duration-500 transform ${isFound ? 'translate-y-0' : 'translate-y-full'}`}>
             <div className="bg-[#fcfdfa] backdrop-blur-md border border-white/60 rounded-3xl p-4 flex items-center gap-4 mb-6 shadow-2xl">
                 <div className="w-14 h-14 rounded-2xl bg-[#ecfccb] flex items-center justify-center text-leaf-primary-dark shrink-0">

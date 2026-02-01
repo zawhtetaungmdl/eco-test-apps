@@ -1,8 +1,28 @@
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import BottomNav from '../components/BottomNav';
 
 export default function DashboardReal() {
   const navigate = useNavigate();
+  const [aqi, setAqi] = useState(160);
+  const [cleanliness, setCleanliness] = useState(35);
+  const [isPurifying, setIsPurifying] = useState(false);
+
+  useEffect(() => {
+    // Simulate real-time data updates
+    const interval = setInterval(() => {
+        setAqi(prev => {
+            const change = Math.floor(Math.random() * 5) - 2; // -2 to +2
+            return Math.max(0, Math.min(500, prev + change));
+        });
+        setCleanliness(prev => {
+            const change = Math.floor(Math.random() * 3) - 1; // -1 to +1
+            return Math.max(0, Math.min(100, prev + change));
+        });
+    }, 3000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <div className="bg-background-light dark:bg-background-dark font-display text-[#111811] dark:text-white transition-colors duration-200 relative min-h-screen pb-24">
@@ -63,7 +83,7 @@ export default function DashboardReal() {
               <div className="flex justify-between items-start mb-8">
                 <div>
                   <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Current Status</p>
-                  <h2 className="text-5xl font-extrabold mt-1 text-danger">160 <span className="text-xl font-bold text-gray-400 dark:text-gray-500">AQI</span></h2>
+                  <h2 className="text-5xl font-extrabold mt-1 text-danger">{aqi} <span className="text-xl font-bold text-gray-400 dark:text-gray-500">AQI</span></h2>
                 </div>
                 <div className="flex flex-col items-end">
                   <span className="inline-flex items-center rounded-full bg-red-100 dark:bg-red-900/40 px-4 py-1.5 text-xs font-bold text-danger dark:text-red-400 border border-red-200 dark:border-red-800 animate-pulse">
@@ -76,10 +96,10 @@ export default function DashboardReal() {
               <div className="flex flex-col gap-3 mb-2">
                 <div className="flex justify-between items-end">
                   <p className="text-sm font-medium">Air Cleanliness</p>
-                  <p className="text-sm font-bold text-danger">35%</p>
+                  <p className="text-sm font-bold text-danger">{cleanliness}%</p>
                 </div>
                 <div className="h-5 w-full rounded-full bg-gray-100 dark:bg-white/10 overflow-hidden">
-                  <div className="h-full rounded-full bg-danger transition-all duration-1000 ease-out" style={{ width: '35%' }}></div>
+                  <div className="h-full rounded-full bg-danger transition-all duration-1000 ease-out" style={{ width: `${cleanliness}%` }}></div>
                 </div>
               </div>
 
@@ -96,9 +116,16 @@ export default function DashboardReal() {
             <span className="text-sm font-bold text-danger dark:text-red-400">Air quality is poor</span>
           </div>
           <div className="grid grid-cols-2 gap-4">
-            <button className="group relative flex flex-col items-center justify-center gap-2 overflow-hidden rounded-2xl bg-urgent hover:bg-orange-700 p-6 h-28 transition-all duration-200 animate-button-glow active:scale-95">
+            <button
+                onClick={() => setIsPurifying(!isPurifying)}
+                className={`group relative flex flex-col items-center justify-center gap-2 overflow-hidden rounded-2xl ${
+                  isPurifying ? 'bg-forest hover:bg-forest-hover' : 'bg-urgent hover:bg-orange-700'
+                } p-6 h-28 transition-all duration-200 animate-button-glow active:scale-95`}
+            >
               <span className="material-symbols-outlined text-white text-[32px] animate-pulse">mode_fan</span>
-              <span className="text-white text-base font-bold tracking-wide">Purify Now</span>
+              <span className="text-white text-base font-bold tracking-wide">
+                  {isPurifying ? 'Purifying...' : 'Purify Now'}
+              </span>
               <div className="absolute inset-0 bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity"></div>
             </button>
             <button

@@ -5,6 +5,7 @@ import BottomNav from '../components/BottomNav';
 export default function DashboardAlert() {
   const navigate = useNavigate();
   const [cleanliness, setCleanliness] = useState(35);
+  const [isPurifying, setIsPurifying] = useState(false);
 
   return (
     <div className="bg-background-light dark:bg-background-dark font-display text-[#111811] dark:text-white transition-colors duration-200 relative min-h-screen pb-24">
@@ -112,9 +113,16 @@ export default function DashboardAlert() {
             <span className="text-sm font-bold text-danger dark:text-red-400">Air quality is poor</span>
           </div>
           <div className="grid grid-cols-2 gap-4">
-            <button className="group relative flex flex-col items-center justify-center gap-2 overflow-hidden rounded-2xl bg-urgent hover:bg-orange-700 p-6 h-28 transition-all duration-200 animate-button-glow active:scale-95">
+            <button
+                onClick={() => setIsPurifying(!isPurifying)}
+                className={`group relative flex flex-col items-center justify-center gap-2 overflow-hidden rounded-2xl ${
+                  isPurifying ? 'bg-forest hover:bg-forest-hover' : 'bg-urgent hover:bg-orange-700'
+                } p-6 h-28 transition-all duration-200 animate-button-glow active:scale-95`}
+            >
               <span className="material-symbols-outlined text-white text-[32px] animate-pulse">mode_fan</span>
-              <span className="text-white text-base font-bold tracking-wide">Purify Now</span>
+              <span className="text-white text-base font-bold tracking-wide">
+                  {isPurifying ? 'Purifying...' : 'Purify Now'}
+              </span>
               <div className="absolute inset-0 bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity"></div>
             </button>
             <button
