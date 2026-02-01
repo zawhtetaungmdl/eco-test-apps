@@ -1,10 +1,68 @@
 import { useNavigate } from 'react-router-dom';
+import { useState, useRef } from 'react';
+import type { KeyboardEvent, ChangeEvent } from 'react';
+import Toast from '../components/Toast';
 
 export default function Pairing() {
   const navigate = useNavigate();
+  const [code, setCode] = useState<string[]>(['', '', '', '', '', '']);
+  const [showToast, setShowToast] = useState(false);
+  const inputsRef = useRef<(HTMLInputElement | null)[]>([]);
+
+  const handleConnect = () => {
+    const fullCode = code.join('');
+    if (fullCode === '123456') {
+      navigate('/dashboard');
+    } else {
+      setShowToast(true);
+    }
+  };
+
+  const handleChange = (index: number, e: ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    // Allow only numbers
+    if (!/^\d*$/.test(value)) return;
+
+    const newCode = [...code];
+    // Handle single char input
+    if (value.length <= 1) {
+      newCode[index] = value;
+      setCode(newCode);
+      if (value !== '' && index < 5) {
+        inputsRef.current[index + 1]?.focus();
+      }
+    }
+    // Handle paste (if user pastes full code)
+    else if (value.length > 1) {
+        const pastedChars = value.split('').slice(0, 6);
+        const updatedCode = [...code];
+        pastedChars.forEach((char, i) => {
+            if (index + i < 6) updatedCode[index + i] = char;
+        });
+        setCode(updatedCode);
+        const nextFocus = Math.min(index + pastedChars.length, 5);
+        inputsRef.current[nextFocus]?.focus();
+    }
+  };
+
+  const handleKeyDown = (index: number, e: KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Backspace') {
+      if (code[index] === '' && index > 0) {
+        inputsRef.current[index - 1]?.focus();
+      }
+    }
+  };
 
   return (
     <div className="font-body text-stone-800 flex flex-col items-center px-6 min-h-screen relative overflow-hidden" style={{ background: 'linear-gradient(180deg, #f0f7ed 0%, #dcf1d6 100%)' }}>
+
+        <Toast
+            message="Wrong Setup Code"
+            isVisible={showToast}
+            onClose={() => setShowToast(false)}
+            type="error"
+        />
+
         {/* Navigation Header */}
         <div className="w-full flex items-center justify-between pt-14 pb-12 z-10">
             <button
@@ -28,16 +86,23 @@ export default function Pairing() {
 
             {/* Code Inputs */}
             <div className="grid grid-cols-6 gap-2 w-full mb-10">
-                <input className="code-input w-full aspect-square text-center text-2xl font-bold rounded-xl border-stone-200 bg-white/60 shadow-sm transition-all" maxLength={1} type="text" defaultValue="A"/>
-                <input className="code-input w-full aspect-square text-center text-2xl font-bold rounded-xl border-stone-200 bg-white/60 shadow-sm transition-all" maxLength={1} type="text" defaultValue="3"/>
-                <input className="code-input w-full aspect-square text-center text-2xl font-bold rounded-xl border-stone-200 bg-white/60 shadow-sm transition-all" maxLength={1} placeholder="·" type="text"/>
-                <input className="code-input w-full aspect-square text-center text-2xl font-bold rounded-xl border-stone-200 bg-white/60 shadow-sm transition-all" maxLength={1} placeholder="·" type="text"/>
-                <input className="code-input w-full aspect-square text-center text-2xl font-bold rounded-xl border-stone-200 bg-white/60 shadow-sm transition-all" maxLength={1} placeholder="·" type="text"/>
-                <input className="code-input w-full aspect-square text-center text-2xl font-bold rounded-xl border-stone-200 bg-white/60 shadow-sm transition-all" maxLength={1} placeholder="·" type="text"/>
+                {code.map((digit, index) => (
+                    <input
+                        key={index}
+                        ref={(el) => { inputsRef.current[index] = el }}
+                        className="code-input w-full aspect-square text-center text-2xl font-bold rounded-xl border-stone-200 bg-white/60 shadow-sm transition-all focus:scale-105"
+                        maxLength={6} // Allow paste
+                        type="tel" // Numeric keyboard on mobile
+                        value={digit}
+                        onChange={(e) => handleChange(index, e)}
+                        onKeyDown={(e) => handleKeyDown(index, e)}
+                        placeholder="·"
+                    />
+                ))}
             </div>
 
             <button
-                onClick={() => navigate('/find')}
+                onClick={handleConnect}
                 className="w-full bg-leaf-primary hover:bg-leaf-primary-dark text-white font-bold py-4 rounded-2xl text-lg shadow-lg shadow-leaf-primary/20 transition-all active:scale-[0.98]"
             >
                 Connect

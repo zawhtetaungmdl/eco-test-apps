@@ -1,7 +1,69 @@
 import { useNavigate } from 'react-router-dom';
+import { useState, useRef, useEffect } from 'react';
+import type { TouchEvent } from 'react';
 
 export default function Welcome() {
   const navigate = useNavigate();
+  const [dragX, setDragX] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const maxDrag = useRef(0);
+
+  useEffect(() => {
+    if (containerRef.current) {
+        // Calculate max drag distance: container width - button width (80px)
+        maxDrag.current = containerRef.current.clientWidth - 80;
+    }
+  }, []);
+
+  const handleDragStart = () => {
+    setIsDragging(true);
+  };
+
+  const handleDragMove = (clientX: number) => {
+    if (!isDragging || !containerRef.current) return;
+
+    const rect = containerRef.current.getBoundingClientRect();
+    const offsetX = clientX - rect.left - 40; // Center offset
+
+    // Clamp values
+    const newX = Math.max(0, Math.min(offsetX, maxDrag.current));
+    setDragX(newX);
+  };
+
+  const handleDragEnd = () => {
+    setIsDragging(false);
+    // Threshold to unlock (e.g., 80%)
+    if (dragX > maxDrag.current * 0.8) {
+        // Success
+        setDragX(maxDrag.current);
+        setTimeout(() => {
+            navigate('/find');
+        }, 300);
+    } else {
+        // Reset
+        setDragX(0);
+    }
+  };
+
+  // Touch Handlers
+  const onTouchMove = (e: TouchEvent) => handleDragMove(e.touches[0].clientX);
+
+  useEffect(() => {
+    const handleGlobalMouseUp = () => {
+        if (isDragging) handleDragEnd();
+    };
+    const handleGlobalMouseMove = (e: globalThis.MouseEvent) => {
+        if (isDragging) handleDragMove(e.clientX);
+    };
+
+    window.addEventListener('mouseup', handleGlobalMouseUp);
+    window.addEventListener('mousemove', handleGlobalMouseMove);
+    return () => {
+        window.removeEventListener('mouseup', handleGlobalMouseUp);
+        window.removeEventListener('mousemove', handleGlobalMouseMove);
+    };
+  }, [isDragging, dragX]);
 
   return (
     <div className="bg-eco-surface font-display-dm antialiased overflow-hidden select-none text-eco-text h-screen w-full relative">
@@ -57,22 +119,37 @@ export default function Welcome() {
           </div>
         </div>
 
-        {/* Footer */}
+        {/* Footer (Swipe Button) */}
         <footer className="relative z-20 pb-12 px-6 w-full max-w-md mx-auto">
-          <div className="relative w-full group cursor-pointer" onClick={() => navigate('/pair')}>
+          <div
+            ref={containerRef}
+            className="relative w-full group cursor-pointer select-none"
+          >
+            {/* Track */}
             <div className="glass-panel-light h-20 w-full rounded-[2rem] flex items-center px-2 relative overflow-hidden transition-all duration-300">
-              <div className="absolute inset-0 flex items-center justify-center pointer-events-none pl-12">
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none pl-12" style={{ opacity: 1 - (dragX / (maxDrag.current || 1)) }}>
                 <p className="text-eco-text/50 text-sm font-medium tracking-widest uppercase">
-                  Get Started
+                  Swipe to Start
                 </p>
               </div>
-              <div className="h-16 w-20 rounded-[1.5rem] bg-sage-primary flex items-center justify-center shadow-[0_4px_15px_rgba(93,140,97,0.4)] z-10 relative transition-transform group-active:translate-x-2 group-active:scale-95">
-                <span className="material-symbols-outlined text-white text-2xl">arrow_forward</span>
-              </div>
-              <div className="absolute left-0 top-0 bottom-0 w-24 bg-gradient-to-r from-sage-primary/10 to-transparent pointer-events-none"></div>
+              <div className="absolute left-0 top-0 bottom-0 bg-gradient-to-r from-sage-primary/20 to-transparent pointer-events-none" style={{ width: `${dragX + 80}px` }}></div>
             </div>
+
+            {/* Handle */}
+            <div
+                className="absolute top-2 left-2 h-16 w-20 rounded-[1.5rem] bg-sage-primary flex items-center justify-center shadow-[0_4px_15px_rgba(93,140,97,0.4)] z-30 cursor-grab active:cursor-grabbing transition-transform duration-75"
+                style={{ transform: `translateX(${dragX}px)` }}
+                onMouseDown={handleDragStart}
+                onTouchStart={handleDragStart}
+                onTouchMove={onTouchMove}
+                onTouchEnd={handleDragEnd}
+            >
+                <span className="material-symbols-outlined text-white text-2xl">arrow_forward</span>
+            </div>
+
             <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 w-3/4 h-8 bg-sage-primary/10 blur-xl rounded-full"></div>
           </div>
+
           <div className="mt-10 flex justify-center items-center gap-6 text-xs text-eco-gray font-medium">
             <span className="cursor-pointer hover:text-sage-primary transition-colors">Privacy Policy</span>
             <span className="w-1.5 h-1.5 rounded-full bg-sage-secondary/30"></span>

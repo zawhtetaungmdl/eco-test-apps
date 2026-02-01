@@ -1,7 +1,17 @@
 import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
 
 export default function FindDevice() {
   const navigate = useNavigate();
+  const [isFound, setIsFound] = useState(false);
+
+  useEffect(() => {
+    // Simulate finding the device after 3 seconds
+    const timer = setTimeout(() => {
+      setIsFound(true);
+    }, 3000);
+    return () => clearTimeout(timer);
+  }, []);
 
   return (
     <div className="bg-black text-white font-display-grotesk overflow-hidden h-screen w-full relative">
@@ -24,8 +34,10 @@ export default function FindDevice() {
                 <span className="material-symbols-outlined text-white text-[20px]">close</span>
             </button>
             <div className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-stone-900/40 backdrop-blur-md border border-white/10">
-                <div className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse shadow-[0_0_8px_rgba(239,68,68,0.8)]"></div>
-                <span className="text-xs font-bold tracking-widest uppercase text-white/90">Eco-Scan Live</span>
+                <div className={`w-1.5 h-1.5 rounded-full ${isFound ? 'bg-leaf-primary' : 'bg-red-500'} animate-pulse shadow-[0_0_8px_rgba(239,68,68,0.8)]`}></div>
+                <span className="text-xs font-bold tracking-widest uppercase text-white/90">
+                    {isFound ? 'Device Found' : 'Eco-Scan Live'}
+                </span>
             </div>
             <button className="flex items-center justify-center w-10 h-10 rounded-full bg-stone-900/40 backdrop-blur-md border border-white/10 active:bg-stone-900/60 transition-colors">
                 <span className="material-symbols-outlined text-white text-[20px]">help</span>
@@ -33,7 +45,7 @@ export default function FindDevice() {
         </div>
 
         {/* Center Scanner UI */}
-        <div className="relative z-10 w-full h-full flex flex-col items-center justify-center pointer-events-none">
+        <div className={`relative z-10 w-full h-full flex flex-col items-center justify-center pointer-events-none transition-opacity duration-500 ${isFound ? 'opacity-0' : 'opacity-100'}`}>
             <div className="relative flex items-center justify-center mb-12">
                 <div className="w-72 h-72 rounded-full border border-leaf-primary/40 bg-leaf-primary/5 backdrop-blur-[2px] relative flex items-center justify-center shadow-[0_0_60px_rgba(120,185,85,0.25)]">
                     <div className="absolute inset-0 rounded-full border-t border-r border-leaf-primary/80 animate-spin opacity-80" style={{ animationDuration: '4s' }}></div>
@@ -57,39 +69,33 @@ export default function FindDevice() {
             </div>
         </div>
 
-        {/* Augmented Reality Elements (Mock) */}
-        <div className="absolute z-10 top-[42%] left-[28%] pointer-events-auto cursor-pointer group">
-            <div className="relative flex items-center justify-center">
-                <div className="w-4 h-4 bg-white rounded-full shadow-[0_0_20px_rgba(255,255,255,1)] z-20 border-2 border-leaf-primary"></div>
-                <div className="absolute w-20 h-20 bg-leaf-primary/30 rounded-full animate-ping opacity-75"></div>
-                <div className="absolute top-4 left-4 w-8 h-8 border-l border-b border-white/40 -rotate-45"></div>
+        {/* Found Device Indicator (Mock Augmented Reality) */}
+        {isFound && (
+             <div className="absolute z-10 top-[42%] left-[28%] pointer-events-auto cursor-pointer group animate-bounce">
+                <div className="relative flex items-center justify-center">
+                    <div className="w-4 h-4 bg-white rounded-full shadow-[0_0_20px_rgba(255,255,255,1)] z-20 border-2 border-leaf-primary"></div>
+                    <div className="absolute w-20 h-20 bg-leaf-primary/30 rounded-full animate-ping opacity-75"></div>
+                    <div className="absolute top-4 left-4 w-8 h-8 border-l border-b border-white/40 -rotate-45"></div>
 
-                {/* Popover */}
-                <div className="absolute left-8 top-8 bg-[#fdfefc] backdrop-blur-xl border border-white/40 p-3 rounded-xl min-w-[160px] shadow-xl transform translate-y-2 opacity-0 group-hover:opacity-100 transition-all duration-300 scale-95 group-hover:scale-100 origin-top-left block">
-                    <div className="flex items-center gap-2 mb-1">
-                        <span className="material-symbols-outlined text-leaf-primary text-sm font-bold">eco</span>
-                        <span className="text-leaf-primary text-[10px] font-bold uppercase tracking-widest">Eco Signal</span>
-                    </div>
-                    <p className="text-stone-800 text-base font-bold leading-tight">Econex Air Mini</p>
-                    <div className="flex items-center gap-1 mt-2">
-                        <div className="h-1 w-6 bg-leaf-primary rounded-full"></div>
-                        <div className="h-1 w-6 bg-leaf-primary rounded-full"></div>
-                        <div className="h-1 w-6 bg-stone-200 rounded-full"></div>
+                    {/* Popover always visible when found */}
+                    <div className="absolute left-8 top-8 bg-[#fdfefc] backdrop-blur-xl border border-white/40 p-3 rounded-xl min-w-[160px] shadow-xl transform translate-y-2 opacity-100 transition-all duration-300 origin-top-left block">
+                        <div className="flex items-center gap-2 mb-1">
+                            <span className="material-symbols-outlined text-leaf-primary text-sm font-bold">eco</span>
+                            <span className="text-leaf-primary text-[10px] font-bold uppercase tracking-widest">Eco Signal</span>
+                        </div>
+                        <p className="text-stone-800 text-base font-bold leading-tight">Econex Air Mini</p>
+                        <div className="flex items-center gap-1 mt-2">
+                            <div className="h-1 w-6 bg-leaf-primary rounded-full"></div>
+                            <div className="h-1 w-6 bg-leaf-primary rounded-full"></div>
+                            <div className="h-1 w-6 bg-stone-200 rounded-full"></div>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
+        )}
 
-        {/* Another dot */}
-        <div className="absolute z-10 top-[35%] right-[15%] pointer-events-auto">
-            <div className="relative flex items-center justify-center opacity-70">
-                <div className="w-2 h-2 bg-white/90 rounded-full z-20 shadow-[0_0_10px_rgba(255,255,255,0.8)]"></div>
-                <div className="absolute w-8 h-8 bg-white/10 rounded-full border border-white/20 animate-pulse"></div>
-            </div>
-        </div>
-
-        {/* Bottom Panel */}
-        <div className="absolute bottom-0 left-0 right-0 z-20 bg-gradient-to-t from-[#1c1917] via-[#1c1917]/80 to-transparent pt-20 pb-8 px-5">
+        {/* Bottom Panel - Slide up when found */}
+        <div className={`absolute bottom-0 left-0 right-0 z-20 bg-gradient-to-t from-[#1c1917] via-[#1c1917]/80 to-transparent pt-20 pb-8 px-5 transition-transform duration-500 transform ${isFound ? 'translate-y-0' : 'translate-y-full'}`}>
             <div className="bg-[#fcfdfa] backdrop-blur-md border border-white/60 rounded-3xl p-4 flex items-center gap-4 mb-6 shadow-2xl">
                 <div className="w-14 h-14 rounded-2xl bg-[#ecfccb] flex items-center justify-center text-leaf-primary-dark shrink-0">
                     <span className="material-symbols-outlined text-2xl">spa</span>
