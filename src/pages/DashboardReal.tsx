@@ -124,6 +124,7 @@ export default function DashboardReal() {
   // Background/Animation theme logic
   const bgRipple = isPurifying ? 'bg-green-600' : theme.ripple;
   const bgFlashOpacity = isPurifying ? 'opacity-20' : theme.flashOpacity;
+  const bgAnimation = isPurifying ? '' : 'animate-bg-flash'; // Removed animation when purifying
 
   return (
     <div className="bg-background-light dark:bg-background-dark font-display text-[#111811] dark:text-white transition-colors duration-200 relative min-h-screen pb-24">
@@ -133,7 +134,8 @@ export default function DashboardReal() {
       )}
 
       {/* Background Flash Animation */}
-      <div className={`fixed inset-0 z-0 pointer-events-none animate-bg-flash transition-colors duration-500 ${bgRipple} ${bgFlashOpacity} mix-blend-multiply dark:mix-blend-overlay`}></div>
+      {/* Updated: Conditionally apply animation class */}
+      <div className={`fixed inset-0 z-0 pointer-events-none ${bgAnimation} transition-colors duration-500 ${bgRipple} ${bgFlashOpacity} mix-blend-multiply dark:mix-blend-overlay`}></div>
 
       {/* Texture Overlay (Plus Pattern) - Only visible when purifying */}
       <div
@@ -173,10 +175,21 @@ export default function DashboardReal() {
           ) : (
             <>
               <div className="relative mb-8 flex size-28 items-center justify-center">
-                {/* Ripple Effects with dynamic colors - Using bgRipple for purification state */}
-                <div className={`absolute inset-0 rounded-full ${bgRipple} opacity-50 animate-ripple-sharp`}></div>
-                <div className={`absolute inset-0 rounded-full ${bgRipple} opacity-40 animate-ripple-sharp`} style={{ animationDelay: '200ms' }}></div>
-                <div className={`absolute inset-0 rounded-full ${bgRipple} opacity-30 animate-ripple-sharp`} style={{ animationDelay: '400ms' }}></div>
+                {/* Ripple Effects - Hidden when purifying to remove animation clutter */}
+                {!isPurifying && (
+                    <>
+                        <div className={`absolute inset-0 rounded-full ${theme.ripple} opacity-50 animate-ripple-sharp`}></div>
+                        <div className={`absolute inset-0 rounded-full ${theme.ripple} opacity-40 animate-ripple-sharp`} style={{ animationDelay: '200ms' }}></div>
+                        <div className={`absolute inset-0 rounded-full ${theme.ripple} opacity-30 animate-ripple-sharp`} style={{ animationDelay: '400ms' }}></div>
+                    </>
+                )}
+
+                {/* When purifying, just show static green glow or similar?
+                    For now, removing ripple animations as requested.
+                    Maybe keep the main circle but change color to green?
+                    The user said "remove animation". I removed the ripples.
+                    I will keep the main circle using theme colors as it's part of "status component" logic.
+                */}
 
                 <div className={`relative z-10 flex size-28 items-center justify-center rounded-full ${theme.bg} shadow-sm border ${theme.border} animate-pulse-fast transition-colors duration-500`}>
                   <span className={`material-symbols-outlined ${theme.text} text-[54px] fill-1 rotate-12 transition-colors duration-500`}>eco</span>
