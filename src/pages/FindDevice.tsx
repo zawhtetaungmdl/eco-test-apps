@@ -38,15 +38,12 @@ export default function FindDevice() {
   }, []);
 
   useEffect(() => {
-    // Only start detection simulation if camera is active
-    if (hasCamera) {
-      // Updated delay to 5 seconds
-      const timer = setTimeout(() => {
-        setIsFound(true);
-      }, 5000);
-      return () => clearTimeout(timer);
-    }
-  }, [hasCamera]);
+    // Simulate finding device after 5 seconds
+    const timer = setTimeout(() => {
+      setIsFound(true);
+    }, 5000);
+    return () => clearTimeout(timer);
+  }, []);
 
   return (
     <div className="bg-black text-white font-display-grotesk overflow-hidden h-screen w-full relative">
@@ -61,7 +58,6 @@ export default function FindDevice() {
                     className="w-full h-full object-cover opacity-90"
                 />
             ) : (
-                 // Fallback Image if camera denied or loading
                 <img
                     alt="Camera Feed Placeholder"
                     className="w-full h-full object-cover opacity-90"
@@ -75,7 +71,6 @@ export default function FindDevice() {
         {/* Top Controls */}
         <div className="absolute top-0 left-0 right-0 z-20 flex items-center justify-between px-4 pt-14 pb-4">
             <button
-                // Updated close button to navigate to home ('/')
                 onClick={() => navigate('/')}
                 className="flex items-center justify-center w-10 h-10 rounded-full bg-stone-900/40 backdrop-blur-md border border-white/10 active:bg-stone-900/60 transition-colors"
             >
@@ -84,7 +79,7 @@ export default function FindDevice() {
             <div className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-stone-900/40 backdrop-blur-md border border-white/10">
                 <div className={`w-1.5 h-1.5 rounded-full ${isFound ? 'bg-leaf-primary' : 'bg-red-500'} animate-pulse shadow-[0_0_8px_rgba(239,68,68,0.8)]`}></div>
                 <span className="text-xs font-bold tracking-widest uppercase text-white/90">
-                    {isFound ? 'Device Found' : (cameraError || 'Eco-Scan Live')}
+                    {isFound ? 'Device Found' : (cameraError ? 'Simulation Mode' : 'Eco-Scan Live')}
                 </span>
             </div>
             <button className="flex items-center justify-center w-10 h-10 rounded-full bg-stone-900/40 backdrop-blur-md border border-white/10 active:bg-stone-900/60 transition-colors">
@@ -144,32 +139,35 @@ export default function FindDevice() {
         )}
 
         {/* Bottom Panel */}
-        <div className={`absolute bottom-0 left-0 right-0 z-20 bg-gradient-to-t from-[#1c1917] via-[#1c1917]/80 to-transparent pt-20 pb-8 px-5 transition-transform duration-500 transform ${isFound ? 'translate-y-0' : 'translate-y-full'}`}>
-            <div className="bg-[#fcfdfa] backdrop-blur-md border border-white/60 rounded-3xl p-4 flex items-center gap-4 mb-6 shadow-2xl">
-                <div className="w-14 h-14 rounded-2xl bg-[#ecfccb] flex items-center justify-center text-leaf-primary-dark shrink-0">
-                    <span className="material-symbols-outlined text-2xl">spa</span>
+        <div className="absolute bottom-0 left-0 right-0 z-20 bg-gradient-to-t from-[#1c1917] via-[#1c1917]/80 to-transparent pt-20 pb-8 px-5">
+            <div className={`transition-all duration-700 transform ${isFound ? 'translate-y-0 opacity-100' : 'translate-y-20 opacity-0 pointer-events-none'}`}>
+                <div className="bg-[#fcfdfa] backdrop-blur-md border border-white/60 rounded-3xl p-4 flex items-center gap-4 mb-6 shadow-2xl">
+                    <div className="w-14 h-14 rounded-2xl bg-[#ecfccb] flex items-center justify-center text-leaf-primary-dark shrink-0">
+                        <span className="material-symbols-outlined text-2xl">spa</span>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                        <p className="text-stone-800 font-bold text-lg truncate font-display-grotesk">Econex Air Mini</p>
+                        <p className="text-stone-500 text-xs font-medium flex items-center gap-1.5 mt-0.5">
+                            <span className="w-2 h-2 rounded-full bg-leaf-primary animate-pulse"></span>
+                            Ready to pair
+                        </p>
+                    </div>
+                    <button
+                        onClick={() => navigate('/dashboard')}
+                        className="bg-leaf-primary hover:bg-leaf-primary-dark text-white font-bold py-3 px-6 rounded-xl text-sm transition-colors shadow-lg shadow-leaf-primary/20"
+                    >
+                        Connect
+                    </button>
                 </div>
-                <div className="flex-1 min-w-0">
-                    <p className="text-stone-800 font-bold text-lg truncate font-display-grotesk">Econex Air Mini</p>
-                    <p className="text-stone-500 text-xs font-medium flex items-center gap-1.5 mt-0.5">
-                        <span className="w-2 h-2 rounded-full bg-leaf-primary animate-pulse"></span>
-                        Ready to pair
-                    </p>
-                </div>
-                <button
-                    onClick={() => navigate('/dashboard')}
-                    className="bg-leaf-primary hover:bg-leaf-primary-dark text-white font-bold py-3 px-6 rounded-xl text-sm transition-colors shadow-lg shadow-leaf-primary/20"
-                >
-                    Connect
-                </button>
             </div>
 
             <div className="flex justify-center">
                 <button
                     onClick={() => navigate('/pair')}
-                    className="text-white/70 text-sm font-medium hover:text-white transition-colors flex items-center gap-2 drop-shadow-md underline decoration-white/40 underline-offset-4"
+                    className="text-white/70 text-sm font-medium hover:text-white transition-colors flex items-center gap-2 drop-shadow-md"
                 >
-                    Don't see your device? Pair Manually
+                    <span>Don't see your device?</span>
+                    <span className="underline decoration-white/40 underline-offset-4">Pair manually</span>
                 </button>
             </div>
             <div className="h-4"></div>
