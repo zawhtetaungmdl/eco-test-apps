@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 
 export interface AirQualityData {
   us_aqi: number;
@@ -45,6 +45,25 @@ export const useAirQuality = () => {
   const [error, setError] = useState<string | null>(null);
   const [location, setLocation] = useState<LocationData | null>(null);
   const [permissionDenied, setPermissionDenied] = useState(false);
+  // Track if we should show the prompt (i.e. if we don't have a saved permission/location yet)
+  // We initialize location from localStorage if available to skip prompt
+
+  useEffect(() => {
+    // Check local storage on mount
+    const savedLoc = localStorage.getItem('ecoHome_location');
+    if (savedLoc) {
+        try {
+            const parsed = JSON.parse(savedLoc);
+            if (parsed && parsed.lat && parsed.lon) {
+                setLocation(parsed);
+                // Fetch data immediately for saved location
+                fetchAirQuality(parsed.lat, parsed.lon);
+            }
+        } catch (e) {
+            console.error("Failed to parse saved location", e);
+        }
+    }
+  }, []);
 
   const fetchAirQuality = async (lat: number, lon: number) => {
     setLoading(true);
@@ -77,6 +96,8 @@ export const useAirQuality = () => {
         lon: result.longitude
       };
       setLocation(loc);
+      // Save to local storage
+      localStorage.setItem('ecoHome_location', JSON.stringify(loc));
       await fetchAirQuality(loc.lat, loc.lon);
     } catch (err) {
       setError('Failed to fetch location');
@@ -113,17 +134,22 @@ export const useAirQuality = () => {
             lon: longitude
           };
           setLocation(loc);
+          localStorage.setItem('ecoHome_location', JSON.stringify(loc));
           await fetchAirQuality(latitude, longitude);
         } catch (e) {
             console.error(e);
             // Fallback name if reverse geocoding fails but we have coords
-            setLocation({ name: "Current Location", lat: latitude, lon: longitude });
+            const loc = { name: "Current Location", lat: latitude, lon: longitude };
+            setLocation(loc);
+            localStorage.setItem('ecoHome_location', JSON.stringify(loc));
             await fetchAirQuality(latitude, longitude);
         }
       },
       async (err) => {
         console.warn("Geolocation denied/failed, falling back to IP", err);
         setPermissionDenied(true);
+        // Even if denied, if we get IP location, save it so we don't ask again?
+        // Maybe better to ask next time if they denied, but IP location is a good fallback.
         await fetchIPLocation();
       }
     );

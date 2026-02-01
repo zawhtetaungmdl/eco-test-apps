@@ -215,7 +215,7 @@ export default function FindDevice() {
                         </p>
                     </div>
                     <button
-                        onClick={() => navigate('/dashboard')}
+                        onClick={() => navigate('/dashboard-real')}
                         className="bg-leaf-primary hover:bg-leaf-primary-dark text-white font-bold py-3 px-6 rounded-xl text-sm transition-colors shadow-lg shadow-leaf-primary/20"
                     >
                         Connect

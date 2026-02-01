@@ -11,8 +11,12 @@ export default function Pairing() {
 
   const handleConnect = () => {
     const fullCode = code.join('');
+    // For demo purposes, any 6-digit code or specific ones can work.
+    // The design ref used 'A3....'.
+    // Assuming '123456' is the "valid" demo code for now, or just let any 6 chars through?
+    // Let's accept '123456' OR 'A3....' style if implemented, but strictly:
     if (fullCode === '123456') {
-      navigate('/dashboard');
+      navigate('/dashboard-real'); // Updated to go to Real Panel
     } else {
       setShowToast(true);
     }
@@ -20,13 +24,14 @@ export default function Pairing() {
 
   const handleChange = (index: number, e: ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
-    // Allow only numbers
-    if (!/^\d*$/.test(value)) return;
+    // Allow only numbers (or alphanumeric if we follow design ref A3...)
+    // Design Ref showed 'A', '3'. So let's allow alphanumeric.
+    if (!/^[a-zA-Z0-9]*$/.test(value)) return;
 
     const newCode = [...code];
     // Handle single char input
     if (value.length <= 1) {
-      newCode[index] = value;
+      newCode[index] = value.toUpperCase();
       setCode(newCode);
       if (value !== '' && index < 5) {
         inputsRef.current[index + 1]?.focus();
@@ -37,7 +42,7 @@ export default function Pairing() {
         const pastedChars = value.split('').slice(0, 6);
         const updatedCode = [...code];
         pastedChars.forEach((char, i) => {
-            if (index + i < 6) updatedCode[index + i] = char;
+            if (index + i < 6) updatedCode[index + i] = char.toUpperCase();
         });
         setCode(updatedCode);
         const nextFocus = Math.min(index + pastedChars.length, 5);
@@ -57,7 +62,7 @@ export default function Pairing() {
     <div className="font-body text-stone-800 flex flex-col items-center px-6 min-h-screen relative overflow-hidden" style={{ background: 'linear-gradient(180deg, #f0f7ed 0%, #dcf1d6 100%)' }}>
 
         <Toast
-            message="Wrong Setup Code"
+            message="Wrong Setup Code (Try 123456)"
             isVisible={showToast}
             onClose={() => setShowToast(false)}
             type="error"
@@ -90,9 +95,9 @@ export default function Pairing() {
                     <input
                         key={index}
                         ref={(el) => { inputsRef.current[index] = el }}
-                        className="code-input w-full aspect-square text-center text-2xl font-bold rounded-xl border-stone-200 bg-white/60 shadow-sm transition-all focus:scale-105"
+                        className="code-input w-full aspect-square text-center text-2xl font-bold rounded-xl border-stone-200 bg-white/60 shadow-sm transition-all focus:scale-105 uppercase"
                         maxLength={6} // Allow paste
-                        type="tel" // Numeric keyboard on mobile
+                        type="text"
                         value={digit}
                         onChange={(e) => handleChange(index, e)}
                         onKeyDown={(e) => handleKeyDown(index, e)}
@@ -116,9 +121,12 @@ export default function Pairing() {
             </div>
         </div>
 
-        {/* Footer Link */}
+        {/* Footer Link - Link back to scanning if they want */}
         <div className="pb-12 pt-4 z-10">
-            <button className="flex items-center gap-2 text-stone-500 font-medium text-sm group">
+            <button
+                onClick={() => navigate('/find')}
+                className="flex items-center gap-2 text-stone-500 font-medium text-sm group"
+            >
                 <span className="material-symbols-outlined text-lg">qr_code_scanner</span>
                 <span className="underline decoration-stone-300 underline-offset-4 group-hover:text-leaf-primary transition-colors">Scan QR code</span>
             </button>
