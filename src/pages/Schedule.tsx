@@ -139,11 +139,11 @@ export default function Schedule() {
             <span className="text-[10px] font-bold">Stats</span>
           </button>
           <button
-            onClick={() => navigate('/profile')}
+            onClick={() => navigate('/settings')}
             className="flex flex-col items-center justify-center w-full h-full gap-1 group text-gray-400 hover:text-green-forest transition-colors"
           >
-            <span className="material-symbols-outlined">person</span>
-            <span className="text-[10px] font-bold">Profile</span>
+            <span className="material-symbols-outlined">settings</span>
+            <span className="text-[10px] font-bold">Setting</span>
           </button>
         </div>
       </nav>

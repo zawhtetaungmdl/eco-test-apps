@@ -13,17 +13,11 @@ export default function DashboardAlert() {
 
       <div className="relative z-10 flex h-full min-h-screen w-full flex-col overflow-x-hidden">
         {/* Header */}
-        <header className="flex items-center justify-between px-6 py-4">
-          <button className="flex size-10 items-center justify-center rounded-full bg-transparent hover:bg-black/5 dark:hover:bg-white/10 transition-colors">
-            <span className="material-symbols-outlined text-[28px]">menu</span>
-          </button>
+        <header className="flex items-center justify-center px-6 py-4">
           <div className="flex items-center gap-2">
             <span className="h-2 w-2 rounded-full bg-danger animate-pulse-fast"></span>
             <p className="text-sm font-bold tracking-wide uppercase text-danger dark:text-red-400">EcoHome</p>
           </div>
-          <button className="flex size-10 items-center justify-center rounded-full bg-transparent hover:bg-black/5 dark:hover:bg-white/10 transition-colors">
-            <span className="material-symbols-outlined text-[24px]">notifications</span>
-          </button>
         </header>
 
         {/* Toggle */}

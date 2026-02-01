@@ -7,7 +7,7 @@ import DashboardReal from './pages/DashboardReal';
 import Stats from './pages/Stats';
 import StatsWeekly from './pages/StatsWeekly';
 import Schedule from './pages/Schedule';
-import Profile from './pages/Profile';
+import Setting from './pages/Setting';
 
 function App() {
   return (
@@ -20,7 +20,7 @@ function App() {
       <Route path="/stats" element={<Stats />} />
       <Route path="/stats-weekly" element={<StatsWeekly />} />
       <Route path="/schedule" element={<Schedule />} />
-      <Route path="/profile" element={<Profile />} />
+      <Route path="/settings" element={<Setting />} />
     </Routes>
   );
 }

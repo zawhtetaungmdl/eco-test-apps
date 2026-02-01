@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 
 interface BottomNavProps {
-  active?: 'home' | 'stats' | 'profile';
+  active?: 'home' | 'stats' | 'setting';
 }
 
 export default function BottomNav({ active }: BottomNavProps) {
@@ -14,7 +14,7 @@ export default function BottomNav({ active }: BottomNavProps) {
     let textClass = "text-[10px] font-medium transition-colors ";
 
     if (isActive) {
-        iconClass += "text-forest dark:text-white fill-1"; // Assuming fill-1 makes it filled if variable font, or use filled icon
+        iconClass += "text-forest dark:text-white fill-1";
         textClass += "text-forest dark:text-white";
     } else {
         iconClass += "text-gray-400 dark:text-gray-500 group-hover:text-forest dark:hover:text-white";
@@ -42,11 +42,11 @@ export default function BottomNav({ active }: BottomNavProps) {
           <span className={getButtonClass('stats').textClass}>Stats</span>
         </button>
         <button
-            onClick={() => navigate('/profile')}
+            onClick={() => navigate('/settings')}
             className="flex flex-col items-center justify-center w-full h-full gap-1 group"
         >
-          <span className={getButtonClass('profile').iconClass}>person</span>
-          <span className={getButtonClass('profile').textClass}>Profile</span>
+          <span className={getButtonClass('setting').iconClass}>settings</span>
+          <span className={getButtonClass('setting').textClass}>Setting</span>
         </button>
       </div>
     </nav>

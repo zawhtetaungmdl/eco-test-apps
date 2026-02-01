@@ -1,14 +1,14 @@
 import { useNavigate } from 'react-router-dom';
 import BottomNav from '../components/BottomNav';
 
-export default function Profile() {
+export default function Setting() {
   const navigate = useNavigate();
 
   return (
     <div className="bg-gradient-to-b from-sage to-mint dark:from-[#1a241a] dark:to-[#121812] font-display text-[#111811] dark:text-white transition-colors duration-200 relative overflow-hidden min-h-screen pb-24">
       <div className="relative z-10 flex h-full min-h-screen w-full flex-col overflow-x-hidden">
         <header className="flex items-center justify-between px-6 py-4">
-          <h1 className="text-xl font-bold text-gray-800 dark:text-gray-100">Profile</h1>
+          <h1 className="text-xl font-bold text-gray-800 dark:text-gray-100">Setting</h1>
           <button className="flex size-10 items-center justify-center rounded-full bg-white/20 dark:bg-white/5 backdrop-blur-sm hover:bg-white/30 transition-colors">
             <span className="material-symbols-outlined text-[24px]">settings</span>
           </button>
@@ -73,7 +73,7 @@ export default function Profile() {
         </section>
       </div>
 
-      <BottomNav active="profile" />
+      <BottomNav active="setting" />
     </div>
   );
 }
