@@ -15,8 +15,10 @@ export default function FindDevice() {
   const requestRef = useRef<number>();
   const streamRef = useRef<MediaStream | null>(null);
   const isFoundRef = useRef(false);
+  const isMountedRef = useRef(true); // Track mount status
 
   useEffect(() => {
+    isMountedRef.current = true;
     let model: cocoSsd.ObjectDetection | undefined;
     isFoundRef.current = false;
 
@@ -25,7 +27,7 @@ export default function FindDevice() {
       try {
         await tf.ready();
         model = await cocoSsd.load();
-        setIsModelLoading(false);
+        if (isMountedRef.current) setIsModelLoading(false);
       } catch (err) {
         console.error("Model loading failed:", err);
       }
@@ -38,6 +40,12 @@ export default function FindDevice() {
           video: { facingMode: 'environment' }
         });
 
+        // Check if unmounted during await
+        if (!isMountedRef.current) {
+          stream.getTracks().forEach(track => track.stop());
+          return;
+        }
+
         streamRef.current = stream;
 
         // Ensure video element exists before assigning
@@ -45,23 +53,30 @@ export default function FindDevice() {
           videoRef.current.srcObject = stream;
           // IMPORTANT: Wait for metadata to load to ensure size is known
           videoRef.current.onloadedmetadata = () => {
-             setHasCamera(true);
-             if (model && !isFoundRef.current) detectFrame(model);
+             if (isMountedRef.current) {
+                 setHasCamera(true);
+                 if (model && !isFoundRef.current) detectFrame(model);
+             }
           };
         }
       } catch (err) {
+        if (!isMountedRef.current) return;
+
         console.error("Camera access denied:", err);
         setCameraError("Camera access denied. Using simulation.");
         // Fallback simulation if camera fails
         setTimeout(() => {
-             setIsFound(true);
-             isFoundRef.current = true;
+             if (isMountedRef.current) {
+                 setIsFound(true);
+                 isFoundRef.current = true;
+             }
         }, 5000);
       }
     };
 
     // Detection Loop
     const detectFrame = (loadedModel: cocoSsd.ObjectDetection) => {
+      if (!isMountedRef.current) return;
       if (!videoRef.current || !canvasRef.current || !loadedModel) return;
       if (isFoundRef.current) return; // Stop loop if found
 
@@ -72,7 +87,7 @@ export default function FindDevice() {
         canvasRef.current.height = videoRef.current.videoHeight;
 
         loadedModel.detect(videoRef.current).then(predictions => {
-          if (isFoundRef.current) return;
+          if (!isMountedRef.current || isFoundRef.current) return;
 
           // Check for 'bottle' or 'cup'
           const foundTarget = predictions.find(p => (p.class === 'bottle' || p.class === 'cup') && p.score > 0.6);
@@ -93,10 +108,11 @@ export default function FindDevice() {
     (async () => {
       await initModel();
       // Only start camera after model is ready or if we want to show feed while loading
-      await startCamera();
+      if (isMountedRef.current) await startCamera();
     })();
 
     return () => {
+      isMountedRef.current = false; // Mark unmounted
       if (requestRef.current) cancelAnimationFrame(requestRef.current);
 
       // Stop all tracks from the stored stream reference
